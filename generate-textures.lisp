@@ -1,3 +1,12 @@
+(cl:defpackage :texture-loader
+  (:use :cl)
+  (:export :generate-texture-from-file))
+
+(eval-when (:load-toplevel :compile-toplevel)
+  (ql:quickload :cl-ppcre))
+
+(in-package :texture-loader)
+
 (defun read-texture-file (file-path)
   (with-open-file (s file-path)
     (loop :for l := nil :then
@@ -15,13 +24,13 @@
   (cl-ppcre:register-groups-bind (x y c)
       ("\\((.*),(.*),(.*)\\)" putpixel-string)
     (list 'PUT
-          (read-from-string x)
-          (read-from-string y)
-          (read-from-string c))))
+          x
+          y
+          c)))
 
 (defun parse-for (for-string)
   (cl-ppcre:register-groups-bind (init cond step)
-      ("\\((.*);(.*);(.*)\\)" for-string) (list init cond step)))
+      ("\\((.*);(.*);(.*)\\)" for-string) (list 'FOR init cond step)))
 
 (defun tokenize (texture-string-list)
   (reverse
@@ -36,3 +45,5 @@
                (t a)))
            texture-string-list
            :initial-value nil)))
+
+(defun generate-texture-from-file ())
