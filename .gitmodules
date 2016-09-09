@@ -1,0 +1,3 @@
+[submodule "boomber"]
+	path = boomber
+	url = git@github.com:0x5b/boomber.git
