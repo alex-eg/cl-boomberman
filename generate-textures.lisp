@@ -1,9 +1,9 @@
 (cl:defpackage :texture-loader
-  (:use :cl)
+  (:use :cl :yacc :cl-lex)
   (:export :generate-texture-from-file))
 
-(eval-when (:load-toplevel :compile-toplevel)
-  (ql:quickload :cl-ppcre))
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (ql:quickload :yacc :cl-lex))
 
 (in-package :texture-loader)
 
