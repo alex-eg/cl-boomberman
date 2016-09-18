@@ -196,4 +196,4 @@
   (let ((strings (fix-newlines
                   (strings+
                    (read-texture-file file-path)))))
-    strings))
+    (parse-with-lexer (graphics-h-lexer strings) *boomber-parser*)))
