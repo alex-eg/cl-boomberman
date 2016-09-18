@@ -27,6 +27,78 @@
   (">" (return (values '> '>)))
   ("," (return 'CO)))
 
+(defun typed-assignment (_type id _op expr)
+  (declare (ignore _type _op))
+  (list 'setf id expr))
+
+(defun regular-assignment (expr-1 _op expr-2)
+  (declare (ignore _op))
+  (list 'setf expr-2 expr-2))
+
+(defun infix-to-prefix (expr-1 op expr-2)
+  (list op expr-1 expr-2))
+
+(defun progn-exprs (expr-1 _co expr-2)
+  (declare (ignore _co))
+  (if (eql 'progn (car expr-1))
+      (append expr-1 (list expr-2))
+      (list 'progn expr-1 expr-2)))
+
+(defun unary-op (op expr)
+  (cond ((eql op '++) (list 'incf expr))
+        ((eql op '--) (list 'decf expr))))
+
+(defun function-call (expr _lp args _rp)
+  (declare (ignore _lp _rp))
+  (if (listp args)
+      (cons expr
+            (nreverse (alexandria:flatten args)))
+      (cons expr (list args))))
+
+(defun paren-expr (_lp expr _rp)
+  (declare (ignore _lp _rp))
+  expr)
+
+(defun arg-list (car _co cdr)
+  (declare (ignore _co))
+  (cons cdr (list car)))
+
+(defun drop-semicolon (expr _semicolon)
+  (declare (ignore _semicolon))
+  expr)
+
+(defun compound-statement ({ statement-list })
+  (declare (ignore { }))
+  statement-list)
+
+(defun statement-list (list statement)
+  (if (eql 'progn (car list))
+      (append list (list statement))
+      (append (list 'progn list) (list statement))))
+
+(defun for-statement (_for _lp init-list condition-list step-list _rp body)
+  (declare (ignore _for _lp _rp))
+  (let (conditions)
+    (if (eql 'progn (car condition-list))
+        (dolist (c (cdr condition-list) (push 'progn conditions))
+          (push `(unless ,c (go exit)) conditions))
+        (setf conditions `(unless ,condition-list (go exit))))
+    `(progn
+       ,init-list
+       (tagbody
+        start
+          ,conditions
+          ,body
+          ,step-list
+          (go start)
+        exit (values)))))
+
+(defun program (program st)
+  (if (eql 'progn (car program))
+      (append program (list st))
+      (list 'progn program st)))
+
+
 (define-parser *boomber-parser*
   (:start-symbol program)
   (:terminals
@@ -37,42 +109,42 @@
 
   (expr
    assignment-expr
-   (expr CO assignment-expr))
+   (expr CO assignment-expr #'progn-exprs))
 
   (assignment-expr
    relational-expr
-   (id id = assignment-expr)
-   (relational-expr = assignment-expr))
+   (id id = assignment-expr #'typed-assignment)
+   (relational-expr = assignment-expr #'regular-assignment))
 
   (relational-expr
    additive-expr
-   (relational-expr < additive-expr)
-   (relational-expr > additive-expr))
+   (relational-expr < additive-expr #'infix-to-prefix)
+   (relational-expr > additive-expr #'infix-to-prefix))
 
   (additive-expr
    unary-expr
-   (additive-expr + unary-expr))
+   (additive-expr + unary-expr #'infix-to-prefix))
 
   (unary-expr
    postfix-expr
-   (++ unary-expr)
-   (-- unary-expr))
+   (++ unary-expr #'unary-op)
+   (-- unary-expr #'unary-op))
 
   (postfix-expr
    primary-expr
    (postfix-expr LP RP (lambda (expr lp rp) (function-call expr lp nil rp)))
-   (postfix-expr LP arg-list RP)
+   (postfix-expr LP arg-list RP #'function-call)
    (postfix-expr -- (lambda (expr op) (unary-op op expr)))
    (postfix-expr ++ (lambda (expr op) (unary-op op expr))))
 
   (primary-expr
    id
    int
-   (LP expr RP))
+   (LP expr RP #'paren-expr))
 
   (arg-list
    assignment-expr
-   (arg-list CO assignment-expr))
+   (arg-list CO assignment-expr #'arg-list))
 
   ;; Statements
 
@@ -83,25 +155,25 @@
 
   (expr-st
    SC
-   (expr SC))
+   (expr SC #'drop-semicolon))
 
   (compound-st
    ({ } (lambda ({ }) (compound-statement { nil })))
-   ({ st-list }))
+   ({ st-list } #'compound-statement))
 
   (st-list
    st
-   (st-list st))
+   (st-list st #'statement-list))
 
   (for-st
    (for LP expr-st expr-st RP st)
-   (for LP expr-st expr-st expr RP st))
+   (for LP expr-st expr-st expr RP st #'for-statement))
 
   ;; Entry
 
   (program
    st
-   (program st)))
+   (program st #'program)))
 
 (defun read-texture-file (file-path)
   (with-open-file (s file-path)
