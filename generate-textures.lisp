@@ -27,13 +27,13 @@
   (">" (return (values '> '>)))
   ("," (return 'CO)))
 
-(defun typed-assignment (_type id _op expr)
-  (declare (ignore _type _op))
-  (list 'setf id expr))
-
 (defun regular-assignment (expr-1 _op expr-2)
   (declare (ignore _op))
   (list 'defparameter expr-1 expr-2))
+
+(defun typed-assignment (_type id _op expr)
+  (declare (ignore _type))
+  (regular-assignment id _op expr))
 
 (defun infix-to-prefix (expr-1 op expr-2)
   (list op expr-1 expr-2))
