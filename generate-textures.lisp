@@ -33,7 +33,7 @@
 
 (defun regular-assignment (expr-1 _op expr-2)
   (declare (ignore _op))
-  (list 'setf expr-2 expr-2))
+  (list 'defparameter expr-1 expr-2))
 
 (defun infix-to-prefix (expr-1 op expr-2)
   (list op expr-1 expr-2))
