@@ -24,12 +24,13 @@
   ("\\(" (return 'LP))
   ("\\)" (return 'RP))
   ("<" (return (values '< '<)))
+  (">" (return (values '> '>)))
   ("," (return 'CO)))
 
 (define-parser *boomber-parser*
   (:start-symbol program)
   (:terminals
-   (++ -- } { SC = LP RP < + CO id int
+   (++ -- } { SC = LP RP < > + CO id int
        for))
 
   ;; Expressions
@@ -45,7 +46,8 @@
 
   (relational-expr
    additive-expr
-   (relational-expr < additive-expr))
+   (relational-expr < additive-expr)
+   (relational-expr > additive-expr))
 
   (additive-expr
    unary-expr
