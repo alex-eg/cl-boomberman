@@ -178,13 +178,7 @@
 (defun read-texture-file (file-path)
   (with-open-file (s file-path)
     (loop :for l := nil :then
-          (handler-bind
-              ((sb-int:stream-decoding-error
-                (lambda (c)
-                  (when (find-restart 'sb-impl::input-replacement c)
-                    (invoke-restart 'sb-impl::input-replacement
-                                    "?")))))
-            (read-line s nil :EOF))
+          (read-line s nil :EOF)
           :until (eq l :EOF)
           :collect l)))
 
