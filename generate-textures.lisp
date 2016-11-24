@@ -27,76 +27,77 @@
   (">" (return (values '> '>)))
   ("," (return 'CO)))
 
-(defun regular-assignment (expr-1 _op expr-2)
-  (declare (ignore _op))
-  (list 'defparameter expr-1 expr-2))
+(eval-when (:compile-toplevel)
+  (defun regular-assignment (expr-1 _op expr-2)
+    (declare (ignore _op))
+    (list 'defparameter expr-1 expr-2))
 
-(defun typed-assignment (_type id _op expr)
-  (declare (ignore _type))
-  (regular-assignment id _op expr))
+  (defun typed-assignment (_type id _op expr)
+    (declare (ignore _type))
+    (regular-assignment id _op expr))
 
-(defun infix-to-prefix (expr-1 op expr-2)
-  (list op expr-1 expr-2))
+  (defun infix-to-prefix (expr-1 op expr-2)
+    (list op expr-1 expr-2))
 
-(defun progn-exprs (expr-1 _co expr-2)
-  (declare (ignore _co))
-  (if (eql 'progn (car expr-1))
-      (append expr-1 (list expr-2))
-      (list 'progn expr-1 expr-2)))
+  (defun progn-exprs (expr-1 _co expr-2)
+    (declare (ignore _co))
+    (if (eql 'progn (car expr-1))
+        (append expr-1 (list expr-2))
+        (list 'progn expr-1 expr-2)))
 
-(defun unary-op (op expr)
-  (cond ((eql op '++) (list 'incf expr))
-        ((eql op '--) (list 'decf expr))))
+  (defun unary-op (op expr)
+    (cond ((eql op '++) (list 'incf expr))
+          ((eql op '--) (list 'decf expr))))
 
-(defun function-call (expr _lp args _rp)
-  (declare (ignore _lp _rp))
-  (if (listp args)
-      (cons expr
-            (nreverse (alexandria:flatten args)))
-      (cons expr (list args))))
+  (defun function-call (expr _lp args _rp)
+    (declare (ignore _lp _rp))
+    (if (listp args)
+        (cons expr
+              (nreverse (alexandria:flatten args)))
+        (cons expr (list args))))
 
-(defun paren-expr (_lp expr _rp)
-  (declare (ignore _lp _rp))
-  expr)
+  (defun paren-expr (_lp expr _rp)
+    (declare (ignore _lp _rp))
+    expr)
 
-(defun arg-list (car _co cdr)
-  (declare (ignore _co))
-  (cons cdr (list car)))
+  (defun arg-list (car _co cdr)
+    (declare (ignore _co))
+    (cons cdr (list car)))
 
-(defun drop-semicolon (expr _semicolon)
-  (declare (ignore _semicolon))
-  expr)
+  (defun drop-semicolon (expr _semicolon)
+    (declare (ignore _semicolon))
+    expr)
 
-(defun compound-statement ({ statement-list })
-  (declare (ignore { }))
-  statement-list)
+  (defun compound-statement ({ statement-list })
+    (declare (ignore { }))
+    statement-list)
 
-(defun statement-list (list statement)
-  (if (eql 'progn (car list))
-      (append list (list statement))
-      (append (list 'progn list) (list statement))))
+  (defun statement-list (list statement)
+    (if (eql 'progn (car list))
+        (append list (list statement))
+        (append (list 'progn list) (list statement))))
 
-(defun for-statement (_for _lp init-list condition-list step-list _rp body)
-  (declare (ignore _for _lp _rp))
-  (let (conditions)
-    (if (eql 'progn (car condition-list))
-        (dolist (c (cdr condition-list) (push 'progn conditions))
-          (push `(unless ,c (go exit)) conditions))
-        (setf conditions `(unless ,condition-list (go exit))))
-    `(progn
-       ,init-list
-       (tagbody
-        start
-          ,conditions
-          ,body
-          ,step-list
-          (go start)
-        exit (values)))))
+  (defun for-statement (_for _lp init-list condition-list step-list _rp body)
+    (declare (ignore _for _lp _rp))
+    (let (conditions)
+      (if (eql 'progn (car condition-list))
+          (dolist (c (cdr condition-list) (push 'progn conditions))
+            (push `(unless ,c (go exit)) conditions))
+          (setf conditions `(unless ,condition-list (go exit))))
+      `(progn
+         ,init-list
+         (tagbody
+          start
+            ,conditions
+            ,body
+            ,step-list
+            (go start)
+          exit (values)))))
 
-(defun program (program st)
-  (if (eql 'progn (car program))
-      (append program (list st))
-      (list 'progn program st)))
+  (defun program (program st)
+    (if (eql 'progn (car program))
+        (append program (list st))
+        (list 'progn program st))))
 
 
 (define-parser *boomber-parser*
