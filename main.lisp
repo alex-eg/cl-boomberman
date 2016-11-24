@@ -1,3 +1,12 @@
+(in-package :cl-user)
+
+(defpackage :boomber
+  (:use :cl :yacc :cl-lex)
+  (:export :main
+           :generate-texture-from-file))
+
+(in-package :boomber)
+
 (defmacro switch-keysym ((keysym-var) &body body)
   (let ((processed
          (mapcar

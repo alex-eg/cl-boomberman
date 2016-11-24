@@ -1,13 +1,4 @@
-(cl:defpackage :texture-loader
-  (:use :cl :yacc :cl-lex)
-  (:export :generate-texture-from-file))
-
-(eval-when (:load-toplevel :compile-toplevel :execute)
-  (ql:quickload :yacc)
-  (ql:quickload :alexandria)
-  (ql:quickload :cl-lex))
-
-(in-package :texture-loader)
+(in-package :boomber)
 
 (define-string-lexer graphics-h-lexer
   ("//.*")                 ; comment
