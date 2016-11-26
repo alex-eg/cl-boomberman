@@ -189,3 +189,38 @@
                   (strings+
                    (read-texture-file file-path)))))
     (parse-with-lexer (graphics-h-lexer strings) *boomber-parser*)))
+
+(defun generate-texture-from-files (file-list)
+  (mapcar #'generate-texture-from-file file-list))
+
+(defun %generate-boomber-textures (dir)
+  (let* ((files (mapcar (lambda (file)
+                          (merge-pathnames file dir))
+                        (list #P"BANG.CPP"
+                              #P"BLOCK1.CPP"
+                              #P"BLOCK2.CPP"
+                              #P"BOMBA.CPP"
+                              #P"ENEMY.CPP"
+                              #P"HERO.CPP"))))
+    (mapcar
+     #'cons
+     (print (mapcar #'pathname-name files))
+     (generate-texture-from-files files))))
+
+(defun generate-boomber-textures ()
+  (let ((dir #P"./textures/"))
+    (mapcar (lambda (file-texture)
+              (let* ((src-file (car file-texture))
+                     (dst-file
+                      (concatenate 'string
+                                   (subseq src-file 0
+                                           (position #\. src-file :from-end t))
+                                   ".lisp"))
+                     (texture (cdr file-texture)))
+                (with-open-file (f (print (merge-pathnames dir dst-file))
+                                   :direction :output
+                                   :if-exists :supersede
+                                   :if-does-not-exist :create)
+                  (write texture :stream f))))
+            (%generate-boomber-textures dir)))
+  (values))
