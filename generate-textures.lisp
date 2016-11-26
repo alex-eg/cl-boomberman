@@ -207,6 +207,38 @@
      (print (mapcar #'pathname-name files))
      (generate-texture-from-files files))))
 
+(defun %remove-unused-functions (tree acc)
+  "Traverse tree and remove functions calls to malloc and free"
+  (let ((list-to-remove
+         (list
+          "MALLOC"
+          "FREE")))
+    (cond
+      ((null tree)
+       (nreverse acc))
+      ((listp (car tree))
+       (%remove-unused-functions
+        (cdr tree)
+        (let ((rest (%remove-unused-functions (car tree) nil)))
+          (if (null rest)
+              acc
+              (cons rest acc)))))
+      ((not (symbolp (car tree)))
+       (%remove-unused-functions (cdr tree)
+                                 (cons (car tree)
+                                       acc)))
+      ((member (symbol-name (car tree))
+               list-to-remove :test #'string=)
+       nil)
+      (t (%remove-unused-functions
+          (cdr tree)
+          (cons (car tree)
+                acc))))))
+
+(defun remove-unused-functions (tree)
+  "Traverse tree and remove functions calls to malloc and free"
+  (%remove-unused-functions tree (list)))
+
 (defun generate-boomber-textures ()
   (let ((dir #P"./textures/"))
     (mapcar (lambda (file-texture)
@@ -216,7 +248,7 @@
                                    (subseq src-file 0
                                            (position #\. src-file :from-end t))
                                    ".lisp"))
-                     (texture (cdr file-texture)))
+                     (texture (remove-unused-functions (cdr file-texture))))
                 (with-open-file (f (print (merge-pathnames dir dst-file))
                                    :direction :output
                                    :if-exists :supersede
@@ -224,3 +256,9 @@
                   (write texture :stream f))))
             (%generate-boomber-textures dir)))
   (values))
+
+(defmacro defun-from-file (name file)
+  (let ((contents
+         (with-open-file (f file)
+           (read f))))
+    `(defun ,name () ,contents)))
