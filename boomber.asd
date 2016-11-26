@@ -4,4 +4,5 @@
     :depends-on (:sdl2 :yacc :cl-lex
                        :alexandria)
     :components ((:file "main")
-                 (:file "generate-textures")))
+                 (:file "generate-textures")
+                 (:file "graphics")))
