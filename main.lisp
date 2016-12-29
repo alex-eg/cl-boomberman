@@ -21,7 +21,7 @@
 
 (defun main ()
   (sdl2:with-init (:video)
-    (sdl2:with-window (win :title "Boomberman-cl"
+    (sdl2:with-window (win :title "Boomberman-cl BITCH"
                            :w 640
                            :h 480)
       (sdl2:with-renderer (ren win :flags '(:accelerated))
