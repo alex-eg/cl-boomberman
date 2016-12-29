@@ -46,8 +46,36 @@
            (assoc num-or-name +color-list+)
            (nth num-or-name +color-list+))))
 
-(defvar *surface* nil
-  "Current drawing surface")
+(defstruct (state
+             (:conc-name g-st-))
+  (color 'white)
+  (fill-color 'black)
+  (texture nil)
+  (pixels nil))
+
+(defparameter +state+ (make-state)
+  "Current graphics state")
+
+(defun make-texture (renderer width height)
+  (sdl2:create-texture renderer :rgba8888 :static
+                       width height))
+
+(defun make-pixels (width height)
+  (make-array (* width height)
+              :element-type '(unsigned-byte 32)))
+
+(defun create-texture-and-pixels (renderer width height)
+  (setf (g-st-texture +state+) (make-texture renderer width height)
+        (g-st-pixels +state+) (make-pixels width height)))
+
+(defun init-graphics (window)
+  (destructuring-bind (w h)
+      (sdl2:get-window-size window)
+    (let ((ren (sdl2:get-renderer window)))
+      (if (g-st-texture +state+)
+          (error "Double init of graphics package in not allowed")
+          (create-texture-and-pixels ren w h)))))
+
 
 (defun rectangle (x y w h))
 (defun line (x0 y0 x1 y1))
