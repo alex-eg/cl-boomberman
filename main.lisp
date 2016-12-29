@@ -12,11 +12,13 @@
           body)))
     `(cond ,@processed)))
 
+(defvar *width* 640)
+(defvar *height* 480)
 (defun main ()
   (sdl2:with-init (:video)
     (sdl2:with-window (win :title "Boomberman-cl BITCH"
-                           :w 640
-                           :h 480)
+                           :w *width*
+                           :h *height*)
       (sdl2:with-renderer (ren win :flags '(:accelerated))
         (let ((x 0)
               (y 0))
