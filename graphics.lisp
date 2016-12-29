@@ -76,6 +76,10 @@
           (error "Double init of graphics package in not allowed")
           (create-texture-and-pixels ren w h)))))
 
+(defun draw-texture (&optional texture)
+  (let ((texture (or texture *texture*)))
+    (sdl2:update-texture)))
+
 
 (defun rectangle (x y w h))
 (defun line (x0 y0 x1 y1))

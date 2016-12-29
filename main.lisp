@@ -14,6 +14,13 @@
 
 (defvar *width* 640)
 (defvar *height* 480)
+(setf *texture* (make-texture *width* *height*))
+
+(defun update-graphics ()
+  (sdl2:render-clear ren)
+  (draw-texture)
+  (sdl2:render-present ren))
+
 (defun main ()
   (sdl2:with-init (:video)
     (sdl2:with-window (win :title "Boomberman-cl BITCH"
@@ -42,8 +49,4 @@
             (:idle
              ()
              (sdl2:delay 100)
-             (sdl2:render-clear ren)
-             (sdl2::%with-rect ((r x y 20 20))
-               (sdl2:render-draw-rect ren
-                                      r))
-             (sdl2:render-present ren))))))))
+             (update-graphics))))))))
