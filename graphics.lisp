@@ -1,4 +1,4 @@
-(in-package :boomber)
+(in-package :graphics)
 
 (defvar *color* 'black
   "Current outline color")
