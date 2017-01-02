@@ -12,7 +12,11 @@
            :getimage
            :putimage))
 
+(defpackage :boomber.parser
+  (:use :cl :yacc :cl-lex)
+  (:export :defun-from-file))
+
 (defpackage :boomber
-  (:use :cl :yacc :cl-lex :graphics)
+  (:use :cl :boomber.parser :boomber.graphics)
   (:export :main
            :generate-texture-from-file))

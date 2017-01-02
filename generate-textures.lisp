@@ -1,4 +1,4 @@
-(in-package :boomber)
+(in-package :boomber.parser)
 
 (define-string-lexer graphics-h-lexer
   ("//.*")                 ; comment
