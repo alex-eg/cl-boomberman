@@ -1,4 +1,4 @@
-(in-package :graphics)
+(in-package :boomber.graphics)
 
 (defmacro color-rgba (r g b a)
   (logior (ash r 24)

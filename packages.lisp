@@ -1,6 +1,6 @@
 (in-package :cl-user)
 
-(defpackage :graphics
+(defpackage :boomber.graphics
   (:use :cl)
   (:export :init-graphics
            :putpixel
