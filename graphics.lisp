@@ -1,5 +1,11 @@
 (in-package :boomber.graphics)
 
+(defmacro defun-graphics (name lambda-list &body body)
+  `(defun ,name ,lambda-list
+     (if (null +state+)
+         (error "Graphics library is not initialized"))
+     ,@body))
+
 (defmacro color-rgba (r g b a)
   (logior (ash r 24)
           (ash g 16)
@@ -80,10 +86,9 @@
   (let ((texture (or texture *texture*)))
     (sdl2:update-texture)))
 
-
-(defun rectangle (x y w h))
-(defun line (x0 y0 x1 y1))
-(defun putpixel (x y color))
+(defun-graphics rectangle (x y w h))
+(defun-graphics line (x0 y0 x1 y1))
+(defun-graphics putpixel (x y color))
 
 (defun setfillstyle (style color))
 (defun floodfill (x y color))
