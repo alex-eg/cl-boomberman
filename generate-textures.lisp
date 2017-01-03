@@ -40,20 +40,27 @@
     (cond ((eql op '++) (list 'incf expr))
           ((eql op '--) (list 'decf expr))))
 
-  (defun function-call (expr _lp args _rp)
-    (declare (ignore _lp _rp))
-    (if (listp args)
-        (cons expr
-              (nreverse (alexandria:flatten args)))
-        (cons expr (list args))))
-
   (defun paren-expr (_lp expr _rp)
     (declare (ignore _lp _rp))
     expr)
 
   (defun arg-list (car _co cdr)
     (declare (ignore _co))
-    (cons cdr (list car)))
+    (format t "car: ~S cdr: ~S~%" car cdr)
+    (if (and (listp car)
+             (listp (car car))
+             (equal :arg (caar car)))
+        (append car (list (cons :arg cdr)))
+        (list (cons :arg car) (cons :arg cdr))))
+
+  (defun function-call (expr _lp args _rp)
+    (declare (ignore _lp _rp))
+    (format t "~%args: ~S~%" args)
+    (if (and (listp args)
+             (listp (car args))
+             (equal :arg (caar args)))
+        (cons expr (mapcar #'cdr args))
+        (cons expr (list args))))
 
   (defun drop-semicolon (expr _semicolon)
     (declare (ignore _semicolon))
